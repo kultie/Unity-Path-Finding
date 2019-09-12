@@ -13,7 +13,7 @@ namespace Kultie.FlowField
             grid = _grid;
         }
 
-        public void FindPaths(Vector2Int target)
+        public void FindPaths(List<Vector2Int> targets)
         {
             Stopwatch sw = new Stopwatch();
             sw.Start();
@@ -22,8 +22,12 @@ namespace Kultie.FlowField
             {
                 _tile.ClearPath();
             }
-            cells[target.x,target.y].BecomeDestination();
-            searchFrontier.Enqueue(cells[target.x, target.y]);
+            for (int i = 0; i < targets.Count; i++) {
+                Vector2Int target = targets[i];
+                cells[target.x, target.y].BecomeDestination();
+                searchFrontier.Enqueue(cells[target.x, target.y]);
+            }
+           
             while (searchFrontier.Count > 0)
             {
                 FFCell tile = searchFrontier.Dequeue();
@@ -39,8 +43,8 @@ namespace Kultie.FlowField
             UnityEngine.Debug.Log(sw.ElapsedMilliseconds + "ms");
         }
 
-        public void UpdatePath(Vector2Int target) {
-            FindPaths(target);
+        public void UpdatePath(List<Vector2Int> targets) {
+            FindPaths(targets);
         }
     }
 }

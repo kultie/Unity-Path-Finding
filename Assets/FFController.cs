@@ -12,7 +12,7 @@ public class FFController : MonoBehaviour {
 
     public SpriteRenderer nodePrefabs;
     public Transform nodeContainer;
-    Vector2Int target;
+    List<Vector2Int> targets = new List<Vector2Int>();
     // Use this for initialization
     void Start () {
         grid = new FFGrid(gridWidth, gridHeight);
@@ -29,8 +29,8 @@ public class FFController : MonoBehaviour {
             gameObjects[(int)node.position.x, (int)node.position.y] = go;
         }
         pathFinding = new FFPathFinding(grid);
-        target = new Vector2Int(gridWidth/2, gridHeight/2);
-        pathFinding.FindPaths(target);
+        targets.Add(new Vector2Int(gridWidth/2, gridHeight/2));
+        pathFinding.FindPaths(targets);
         UpdateArrow();
     }
 
@@ -58,7 +58,11 @@ public class FFController : MonoBehaviour {
 
     // Update is called once per frame
     void UpdateArrow () {
-        gameObjects[(int)target.x, (int)target.y].gameObject.SetActive(false);
+        for (int i = 0; i < targets.Count; i++) {
+            Vector2Int target = targets[i];
+            gameObjects[target.x, target.y].gameObject.SetActive(false);
+        }
+
         foreach (var node in grid.GetCells())
         {
             float angle = Mathf.Atan2(node.direction.x, node.direction.y) * Mathf.Rad2Deg;
@@ -95,6 +99,18 @@ public class FFController : MonoBehaviour {
                         return;
                     }
                 }
+            }
+        }
+
+        if (Input.GetMouseButtonDown(1)) {
+            Vector2 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            Vector2Int currentTilePos = MouseToNode(mousePos);
+            FFCell cell = grid.GetCells()[currentTilePos.x, currentTilePos.y];
+            if (cell.walkable)
+            {
+                targets.Add(currentTilePos);
+                pathFinding.FindPaths(targets);
+                UpdateArrow();
             }
         }
     }
